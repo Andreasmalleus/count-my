@@ -1,10 +1,11 @@
 import { NextPage } from "next";
 import { Layout } from "../components/Layout";
 import Image from "next/image";
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ErrorType } from "../types";
 import { Loader } from "../components/Loader";
+import { useUploadReducer } from "../hooks/useUploadReducer";
 
 export interface ResponseType {
   error: string;
@@ -12,23 +13,31 @@ export interface ResponseType {
 }
 
 const UploadPage: NextPage = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileSizeLimit = 104857600; //100MB
-  const [error, setError] = useState<ErrorType | null>(null);
-  const [identifier, setIdentifer] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  const { state, dispatch } = useUploadReducer({
+    error: "",
+    selectedFile: null,
+    isLoading: false,
+    isCopied: false,
+    identifier: "",
+  });
+
+  const { error, isCopied, isLoading, identifier, selectedFile } = state;
 
   const onDrop = (files: File[]) => {
     const file: File = files[0];
     if (file.size >= fileSizeLimit) {
-      setError({ message: "File size can't be more than 100MB" });
+      dispatch({
+        type: "ERROR",
+        message: "File size can't be more than 100MB",
+      });
     }
     if (file.type === "text/plain") {
-      setSelectedFile(file);
+      dispatch({ type: "FILE", payload: file });
       return;
     }
-    setError({ message: "Only txt files are supported" });
+    dispatch({ type: "ERROR", message: "Only txt files are supported" });
   };
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -40,24 +49,25 @@ const UploadPage: NextPage = () => {
 
   const handleSubmission = () => {
     if (!selectedFile) {
-      setError({ message: "Please select a file" });
+      dispatch({ type: "ERROR", message: "Please select a file" });
       return;
     }
     uploadFile();
   };
 
   const toggleClipboard = () => {
+    console.log(isCopied);
     if (isCopied) {
       navigator.clipboard.writeText("");
-      setIsCopied(false);
+      dispatch({ type: "COPY" });
       return;
     }
     navigator.clipboard.writeText(identifier);
-    setIsCopied(true);
+    dispatch({ type: "COPY" });
   };
 
   const uploadFile = async () => {
-    setIsLoading(true);
+    dispatch({ type: "LOADING" });
     const formData = new FormData();
     formData.append("file", selectedFile!);
     fetch(
@@ -70,18 +80,14 @@ const UploadPage: NextPage = () => {
       .then((res) => res.json())
       .then((data: ResponseType) => {
         if (data.error) {
-          setError({ message: data.error });
-          setIsLoading(false);
+          dispatch({ type: "ERROR", message: data.error });
           return;
         }
-        setIsLoading(false);
-        setIdentifer(data.payload);
-        setSelectedFile(null);
+        dispatch({ type: "SUCCESS", payload: data.payload });
         return;
       })
-      .catch((e: Error) => {
-        setError({ message: e.message });
-        setIsLoading(false);
+      .catch(({ message }: Error) => {
+        dispatch({ type: "ERROR", message });
       });
   };
 
@@ -108,7 +114,7 @@ const UploadPage: NextPage = () => {
           height={20}
           className="cursor-pointer"
           onClick={() => {
-            setSelectedFile(null);
+            dispatch({ type: "FILE", payload: null });
           }}
         />
       </div>
@@ -144,9 +150,7 @@ const UploadPage: NextPage = () => {
               Upload your file
             </button>
             {/*Show errors*/}
-            {error ? (
-              <div className="text-xs text-red-400">{error?.message}</div>
-            ) : null}
+            {error ? <div className="text-xs text-red-400">{error}</div> : null}
             {/*Show identifier if the upload was successful*/}
             {isLoading ? <Loader /> : null}
             {!identifier ? null : (
