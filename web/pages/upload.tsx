@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ErrorType } from "../types";
 import ClipLoader from "react-spinners/ClipLoader";
+import { Loader } from "../components/Loader";
 
 export interface ResponseType {
   error: string;
@@ -138,14 +139,7 @@ const UploadPage: NextPage = () => {
               <div className="text-xs text-red-400">{error?.message}</div>
             ) : null}
             {/*Show identifier if the upload was successful*/}
-            {isLoading ? (
-              <div className="flex justify-center w-full mt-4">
-                <div className="bg-white text-xs p-2 rounded-md shadow-md flex items-center">
-                  <div className="mr-1">Loading...</div>
-                  <ClipLoader size={12} />
-                </div>
-              </div>
-            ) : null}
+            {isLoading ? <Loader /> : null}
             {!identifier ? null : (
               <div className="flex justify-center w-full mt-4">
                 <div className="bg-white text-xs p-2 rounded-md shadow-md flex">

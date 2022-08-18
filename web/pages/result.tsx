@@ -5,6 +5,8 @@ import { Table } from "../components/Table";
 import ReactWordcloud from "react-wordcloud";
 import { ErrorType } from "../types";
 import { WordCloud } from "../components/WordCloud";
+import ClipLoader from "react-spinners/ClipLoader";
+import { Loader } from "../components/Loader";
 
 export interface ResponseType {
   error: string;
@@ -27,8 +29,10 @@ const ResultPage: NextPage = () => {
   const [identifier, setIdentifier] = useState<string>("");
   const [filters, setFilters] = useState<string>("");
   const [error, setError] = useState<ErrorType | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchData = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(
         `http://${process.env.NEXT_PUBLIC_SERVER_HOST}:${process.env.NEXT_PUBLIC_SERVER_PORT}/data?` +
@@ -38,11 +42,14 @@ const ResultPage: NextPage = () => {
       );
       const data: ResponseType = await response.json();
       if (data.error) {
+        setIsLoading(false);
         setError({ message: data.error });
         return;
       }
+      setIsLoading(false);
       setData(JSON.parse(data.payload.data));
     } catch (e: InstanceType<Error>) {
+      setIsLoading(false);
       setError({ message: "Failed to fetch" });
     }
   };
@@ -92,6 +99,7 @@ const ResultPage: NextPage = () => {
             >
               Fetch
             </button>
+            {isLoading ? <Loader /> : null}
             {error ? (
               <div className="text-xs text-red-400 mt-2">{error?.message}</div>
             ) : null}
