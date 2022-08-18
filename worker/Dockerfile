@@ -1,0 +1,15 @@
+FROM openjdk:17-jdk-slim-buster
+ENV WORKDIR = /usr/app/
+WORKDIR $WORKDIR
+
+ENV SERVER_PORT=8081
+ENV POSTGRES_PORT=5432
+ENV RABBIT_PORT=5672
+
+ENV POSTGRES_USERNAME=test
+ENV POSTGRES_PASSWORD=test
+ENV RABBIT_USERNAME=guest
+ENV RABBIT_PASSWORD=guest
+
+COPY build/libs/*.jar worker-service.jar
+ENTRYPOINT ["java","-jar","worker-service.jar"]

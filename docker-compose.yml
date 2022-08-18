@@ -1,0 +1,51 @@
+version: "3"
+services:
+  web:
+    build: ./web
+    container_name: web-app
+    ports:
+      - 3000:3000
+    environment:
+      - SERVER_HOST=core
+      - SERVER_PORT=8080
+    networks:
+      - full-net
+  db:
+    build: ./db
+    container_name: db-service
+    ports:
+      - 5432:5432
+    networks:
+      - full-net
+  broker:
+    image: rabbitmq:3
+    container_name: broker-service
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - full-net
+  core:
+    build: ./core
+    container_name: core-service
+    ports:
+      - 8080:8080
+    environment:
+      - POSTGRES_HOST=db
+      - RABBIT_HOST=broker
+      - WEB_HOST=localhost
+    networks:
+      - full-net
+  worker:
+    build: ./worker
+    container_name: worker-service
+    ports:
+      - 8081:8081
+    environment:
+      - POSTGRES_HOST=db
+      - RABBIT_HOST=broker
+    networks:
+      - full-net
+networks:
+  full-net:
+    driver: bridge

@@ -1,0 +1,2 @@
+CREATE DATABASE word_count;
+GRANT ALL PRIVILEGES ON DATABASE word_count to test;
