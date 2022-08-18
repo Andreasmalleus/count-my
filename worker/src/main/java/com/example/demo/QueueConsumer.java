@@ -1,6 +1,5 @@
 package com.example.demo;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.models.Count;
 import com.example.demo.repositories.CountRepository;
-import com.example.demo.utils.MessageConsumer;
 import com.example.demo.utils.TextProccessor;
 import com.google.gson.Gson;
 
@@ -32,8 +30,6 @@ public class QueueConsumer {
   @Autowired
   RabbitTemplate rabbitTemplate;
 
-  final MessageConsumer messageConsumer = new MessageConsumer();
-
   final TextProccessor textProccessor = new TextProccessor();
 
   @RabbitListener(queues = RabbitConfig.MAIN_QUEUE)
@@ -43,7 +39,6 @@ public class QueueConsumer {
     Map<String, Object> headers = properties.getHeaders();
     boolean isFinished = (Boolean) headers.get("finished");
 
-    messageConsumer.concatenateMessages(message.getBody());
     String text = new String(message.getBody(), StandardCharsets.UTF_8);
     textProccessor.processeText(text);
 
@@ -62,7 +57,6 @@ public class QueueConsumer {
       rabbitTemplate.sendAndReceive(RabbitConfig.EXCHANGE, RabbitConfig.REPLY_QUEUE, build, correlationData);
 
       // EMPTY THE ARRAY
-      messageConsumer.emptyMessage();
       textProccessor.clearProcessedText();
       System.out.printf("added %s \n", jsonStr);
     }
