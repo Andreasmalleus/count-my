@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ErrorType } from "../types";
-import ClipLoader from "react-spinners/ClipLoader";
 import { Loader } from "../components/Loader";
 
 export interface ResponseType {
@@ -16,8 +15,9 @@ const UploadPage: NextPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileSizeLimit = 104857600; //100MB
   const [error, setError] = useState<ErrorType | null>(null);
-  const [identifier, setIdentifer] = useState<String>("");
+  const [identifier, setIdentifer] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const onDrop = (files: File[]) => {
     const file: File = files[0];
@@ -46,6 +46,16 @@ const UploadPage: NextPage = () => {
     uploadFile();
   };
 
+  const toggleClipboard = () => {
+    if (isCopied) {
+      navigator.clipboard.writeText("");
+      setIsCopied(false);
+      return;
+    }
+    navigator.clipboard.writeText(identifier);
+    setIsCopied(true);
+  };
+
   const uploadFile = async () => {
     setIsLoading(true);
     const formData = new FormData();
@@ -72,7 +82,6 @@ const UploadPage: NextPage = () => {
       .catch((e: Error) => {
         setError({ message: e.message });
         setIsLoading(false);
-        return;
       });
   };
 
@@ -142,10 +151,24 @@ const UploadPage: NextPage = () => {
             {isLoading ? <Loader /> : null}
             {!identifier ? null : (
               <div className="flex justify-center w-full mt-4">
-                <div className="bg-white text-xs p-2 rounded-md shadow-md flex">
+                <div className="bg-white text-xs p-2 rounded-md shadow-md flex items-center">
                   <p>Your identifier: </p>
                   <span className="font-bold mx-1">{identifier}</span>
                 </div>
+                <button
+                  className="ml-1 rounded-md bg-white shadow-md px-2 flex justify-center items-center"
+                  style={{
+                    backgroundColor: isCopied ? "rgb(96 165 250)" : "white",
+                  }}
+                  onClick={() => toggleClipboard()}
+                >
+                  <Image
+                    src={"/icons/clipboard.svg"}
+                    width={15}
+                    height={15}
+                    alt={"Clipboard icon"}
+                  />
+                </button>
               </div>
             )}
           </aside>
