@@ -28,14 +28,10 @@ Text processing application, that consists of multiple services.
 
 ### Technologies used
 
-**Core & Worker**
-Spring Boot
+**Core & Worker** - Spring Boot
 
-**Web / Client**
-React
+**Web / Client** - React
 
-**Database**
-PostgreSQL
+**Database** - PostgreSQL
 
-**Message broker**
-RabbitMQ
+**Message broker** - RabbitMQ
