@@ -3,7 +3,7 @@ import { useReducer } from "react";
 interface ReducerState {
   error: string;
   identifier: string;
-  filters: string;
+  filters: string[] | null;
   isLoading: boolean;
   data: Record<string, number> | null;
 }
@@ -12,8 +12,8 @@ type ActionType =
   | { type: "ERROR"; message: string }
   | { type: "SUCCESS"; payload: Record<string, number> }
   | { type: "LOADING" }
-  | { type: "IDENTIFIER"; payload: string }
-  | { type: "FILTERS"; payload: string }
+  | { type: "SET_IDENTIFIER"; payload: string }
+  | { type: "SET_FILTERS"; payload: string }
   | { type: "RESET" };
 
 export const useResultReducer = (initialState: ReducerState) => {
@@ -40,22 +40,22 @@ export const useResultReducer = (initialState: ReducerState) => {
             isLoading: true,
           };
         }
-        case "IDENTIFIER": {
+        case "SET_IDENTIFIER": {
           return {
             ...state,
             identifier: action.payload,
           };
         }
-        case "FILTERS": {
+        case "SET_FILTERS": {
           return {
             ...state,
-            filters: action.payload,
+            filters: action.payload.split(","),
           };
         }
         case "RESET": {
           return {
             ...state,
-            filters: "",
+            filters: null,
             data: null,
             identifier: "",
           };

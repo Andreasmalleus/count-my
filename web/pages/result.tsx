@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import { useState } from "react";
+import { createRef, useRef, useState } from "react";
 import { Layout } from "../components/Layout";
 import { Table } from "../components/Table";
 import ReactWordcloud from "react-wordcloud";
@@ -34,12 +34,13 @@ const ResultPage: NextPage = () => {
   const { state, dispatch } = useResultReducer({
     data: null,
     identifier: "",
-    filters: "",
+    filters: null,
     error: "",
     isLoading: false,
   });
 
   const { data, identifier, filters, error, isLoading } = state;
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = () => {
     dispatch({ type: "LOADING" });
@@ -83,6 +84,13 @@ const ResultPage: NextPage = () => {
   const convertToList = (data: DataType): WordCloudTags[] =>
     Object.keys(data).map((key) => ({ text: key, value: data[key] }));
 
+  const applyFilters = () => {
+    const input: string | undefined = inputRef.current?.value;
+    if (input) {
+      dispatch({ type: "SET_FILTERS", payload: input });
+    }
+  };
+
   return (
     <Layout>
       <div className="w-full h-full flex flex-col justify-center items-center">
@@ -97,7 +105,7 @@ const ResultPage: NextPage = () => {
               placeholder="identifier"
               value={identifier}
               onChange={(e) =>
-                dispatch({ type: "IDENTIFIER", payload: e.target.value })
+                dispatch({ type: "SET_IDENTIFIER", payload: e.target.value })
               }
             />
             <button
@@ -117,23 +125,32 @@ const ResultPage: NextPage = () => {
               <div className="w-full">
                 <WordCloud
                   data={convertToList(data).filter(
-                    ({ text }) => !filters.split(",").includes(text)
+                    ({ text }) => !filters?.includes(text)
                   )}
                 />
               </div>
-              <div className="w-1/4">
+              <div className="w-1/2">
                 <label htmlFor="" className="text-xs">
                   Add filters (comma delimeted)
                 </label>
-                <input
-                  type="text"
-                  className="bg-white rounded-md mb-2 p-1 flex flex-col text-xs shadow-md w-full"
-                  onChange={(e) =>
-                    dispatch({ type: "FILTERS", payload: e.target.value })
-                  }
-                  placeholder={"my,name,is"}
+                <div className="flex items-center mb-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    className="bg-white rounded-md p-2 flex flex-col text-xs shadow-md w-full"
+                    placeholder={"my,name,is"}
+                  />
+                  <button
+                    className="btn-primary p-2 ml-2"
+                    onClick={() => applyFilters()}
+                  >
+                    apply
+                  </button>
+                </div>
+                <Table
+                  data={data}
+                  filter={(t: string) => !filters?.includes(t)}
                 />
-                <Table data={data} filters={filters} />
                 <div className="flex items-center mt-2 justify-between">
                   <a
                     className="btn-primary"
