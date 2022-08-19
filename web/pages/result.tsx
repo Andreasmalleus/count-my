@@ -7,14 +7,20 @@ import { ErrorType } from "../types";
 import { WordCloud } from "../components/WordCloud";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Loader } from "../components/Loader";
+import { useResultReducer } from "../hooks/useResultReducer";
 
-export interface ResponseType {
+interface GetResponse {
   error: string;
   payload: {
     data: string;
     id: number;
     identifier: string;
   };
+}
+
+interface DeleteResponse {
+  error: string;
+  payload: boolean;
 }
 
 interface WordCloudTags {
@@ -25,54 +31,53 @@ interface WordCloudTags {
 type DataType = Record<string, number>;
 
 const ResultPage: NextPage = () => {
-  const [data, setData] = useState<null | DataType>(null);
-  const [identifier, setIdentifier] = useState<string>("");
-  const [filters, setFilters] = useState<string>("");
-  const [error, setError] = useState<ErrorType | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { state, dispatch } = useResultReducer({
+    data: null,
+    identifier: "",
+    filters: "",
+    error: "",
+    isLoading: false,
+  });
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_SERVER_HOST}:${process.env.NEXT_PUBLIC_SERVER_PORT}/data?` +
-          new URLSearchParams({
-            identifier,
-          })
-      );
-      const data: ResponseType = await response.json();
-      if (data.error) {
-        setIsLoading(false);
-        setError({ message: data.error });
+  const { data, identifier, filters, error, isLoading } = state;
+
+  const fetchData = () => {
+    dispatch({ type: "LOADING" });
+    fetch(
+      `http://${process.env.NEXT_PUBLIC_SERVER_HOST}:${process.env.NEXT_PUBLIC_SERVER_PORT}/data?` +
+        new URLSearchParams({
+          identifier,
+        })
+    )
+      .then((res) => res.json())
+      .then((data: GetResponse) => {
+        if (data.error) {
+          dispatch({ type: "ERROR", message: data.error });
+          return;
+        }
+        dispatch({ type: "SUCCESS", payload: JSON.parse(data.payload.data) });
         return;
-      }
-      setIsLoading(false);
-      setData(JSON.parse(data.payload.data));
-    } catch (e: InstanceType<Error>) {
-      setIsLoading(false);
-      setError({ message: "Failed to fetch" });
-    }
+      })
+      .catch(({ message }: Error) => dispatch({ type: "ERROR", message }));
   };
 
-  const deleteEntry = async () => {
-    try {
-      const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_SERVER_HOST}:${process.env.NEXT_PUBLIC_SERVER_PORT}/data?` +
-          new URLSearchParams({
-            identifier,
-          }),
-        { method: "DELETE" }
-      );
-      const data: ResponseType = await response.json();
-      if (data.error) {
-        setError({ message: data.error });
-        return;
-      }
-      setData(null);
-      setIdentifier("");
-    } catch (e: InstanceType<Error>) {
-      setError({ message: "Failed to fetch" });
-    }
+  const deleteEntry = () => {
+    fetch(
+      `http://${process.env.NEXT_PUBLIC_SERVER_HOST}:${process.env.NEXT_PUBLIC_SERVER_PORT}/data?` +
+        new URLSearchParams({
+          identifier,
+        }),
+      { method: "DELETE" }
+    )
+      .then((res) => res.json())
+      .then((data: DeleteResponse) => {
+        if (data.error) {
+          dispatch({ type: "ERROR", message: data.error });
+          return;
+        }
+        dispatch({ type: "RESET" });
+      })
+      .catch(({ message }) => dispatch({ type: "ERROR", message }));
   };
 
   const convertToList = (data: DataType): WordCloudTags[] =>
@@ -91,7 +96,9 @@ const ResultPage: NextPage = () => {
               className="w-full p-2 rounded-md placeholder:text-xs text-xs shadow-md"
               placeholder="identifier"
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              onChange={(e) =>
+                dispatch({ type: "IDENTIFIER", payload: e.target.value })
+              }
             />
             <button
               className="btn-primary w-fit mt-2"
@@ -101,7 +108,7 @@ const ResultPage: NextPage = () => {
             </button>
             {isLoading ? <Loader /> : null}
             {error ? (
-              <div className="text-xs text-red-400 mt-2">{error?.message}</div>
+              <div className="text-xs text-red-400 mt-2">{error}</div>
             ) : null}
           </div>
         ) : (
@@ -121,7 +128,9 @@ const ResultPage: NextPage = () => {
                 <input
                   type="text"
                   className="bg-white rounded-md mb-2 p-1 flex flex-col text-xs shadow-md w-full"
-                  onChange={(e) => setFilters(e.target.value)}
+                  onChange={(e) =>
+                    dispatch({ type: "FILTERS", payload: e.target.value })
+                  }
                   placeholder={"my,name,is"}
                 />
                 <Table data={data} filters={filters} />

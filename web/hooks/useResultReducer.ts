@@ -3,19 +3,20 @@ import { useReducer } from "react";
 interface ReducerState {
   error: string;
   identifier: string;
-  isCopied: boolean;
+  filters: string;
   isLoading: boolean;
-  selectedFile: File | null;
+  data: Record<string, number> | null;
 }
 
 type ActionType =
   | { type: "ERROR"; message: string }
-  | { type: "SUCCESS"; payload: string }
+  | { type: "SUCCESS"; payload: Record<string, number> }
   | { type: "LOADING" }
-  | { type: "FILE"; payload: File | null }
-  | { type: "COPY" };
+  | { type: "IDENTIFIER"; payload: string }
+  | { type: "FILTERS"; payload: string }
+  | { type: "RESET" };
 
-export const useUploadReducer = (initialState: ReducerState) => {
+export const useResultReducer = (initialState: ReducerState) => {
   const [state, dispatch] = useReducer(
     (state: ReducerState, action: ActionType) => {
       switch (action.type) {
@@ -29,9 +30,8 @@ export const useUploadReducer = (initialState: ReducerState) => {
         case "SUCCESS": {
           return {
             ...state,
-            identifier: action.payload,
+            data: action.payload,
             isLoading: false,
-            selectedFile: null,
           };
         }
         case "LOADING": {
@@ -40,16 +40,24 @@ export const useUploadReducer = (initialState: ReducerState) => {
             isLoading: true,
           };
         }
-        case "FILE": {
+        case "IDENTIFIER": {
           return {
             ...state,
-            selectedFile: action.payload,
+            identifier: action.payload,
           };
         }
-        case "COPY": {
+        case "FILTERS": {
           return {
             ...state,
-            isCopied: !state.isCopied,
+            filters: action.payload,
+          };
+        }
+        case "RESET": {
+          return {
+            ...state,
+            filters: "",
+            data: null,
+            identifier: "",
           };
         }
         default: {

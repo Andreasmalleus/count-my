@@ -7,7 +7,7 @@ import { ErrorType } from "../types";
 import { Loader } from "../components/Loader";
 import { useUploadReducer } from "../hooks/useUploadReducer";
 
-export interface ResponseType {
+interface ResponseType {
   error: string;
   payload: string;
 }
@@ -66,7 +66,7 @@ const UploadPage: NextPage = () => {
     dispatch({ type: "COPY" });
   };
 
-  const uploadFile = async () => {
+  const uploadFile = () => {
     dispatch({ type: "LOADING" });
     const formData = new FormData();
     formData.append("file", selectedFile!);
