@@ -7,7 +7,8 @@ module.exports = {
     extend: {
       fontFamily: {
         body: ["Graphik Regular", "sans-serif"],
-        headings: ["Graphik Bold", "sans-serif"],
+        medium: ["Graphik Medium", "sans-serif"],
+        bold: ["Graphik Bold", "sans-serif"],
       },
     },
   },
