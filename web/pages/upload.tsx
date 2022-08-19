@@ -91,6 +91,15 @@ const UploadPage: NextPage = () => {
       });
   };
 
+  const formatFileSize = (size: number): string => {
+    var i = Math.floor(Math.log(size) / Math.log(1024));
+    return (
+      ((size / Math.pow(1024, i)) as any).toFixed(2) * 1 +
+      " " +
+      ["B", "kB", "MB", "GB", "TB"][i]
+    );
+  };
+
   const ChosenFilesMenu = (file: File) => (
     <div
       className="bg-white rounded-md p-2 shadow-md mt-2 w-full"
@@ -104,8 +113,8 @@ const UploadPage: NextPage = () => {
             height={20}
             alt={"Icon that looks like a document"}
           />
-          <div className="ml-1 text-xs">{file.name}</div>
-          <div className="ml-1 text-xs">{Math.round(file.size)}</div>
+          <div className="ml-1 text-xs font-medium">{file.name}</div>
+          <div className="ml-1 text-xs">{formatFileSize(file.size)}</div>
         </div>
         <Image
           src={"/icons/close.svg"}
