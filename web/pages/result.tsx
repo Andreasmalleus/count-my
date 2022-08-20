@@ -91,6 +91,12 @@ const ResultPage: NextPage = () => {
     }
   };
 
+  const editKey = (key: string, newKey: string) => {
+    if (!data![newKey] && newKey != "") {
+      dispatch({ type: "EDIT", payload: { key, newKey } });
+    }
+  };
+
   return (
     <Layout>
       <div className="w-full h-full flex flex-col justify-center items-center">
@@ -150,6 +156,7 @@ const ResultPage: NextPage = () => {
                 <Table
                   data={data}
                   filter={(t: string) => !filters?.includes(t)}
+                  editKey={editKey}
                 />
                 <div className="flex items-center mt-2 justify-between">
                   <a

@@ -166,7 +166,7 @@ const UploadPage: NextPage = () => {
               <div className="flex justify-center w-full mt-4">
                 <div className="bg-white text-xs p-2 rounded-md shadow-md flex items-center">
                   <p>Your identifier: </p>
-                  <span className="font-bold mx-1">{identifier}</span>
+                  <span className="font-medium mx-1">{identifier}</span>
                 </div>
                 <button
                   className="ml-1 rounded-md bg-white shadow-md px-2 flex justify-center items-center"

@@ -8,13 +8,19 @@ interface ReducerState {
   data: Record<string, number> | null;
 }
 
+interface EditPayload {
+  key: string;
+  newKey: string;
+}
+
 type ActionType =
   | { type: "ERROR"; message: string }
   | { type: "SUCCESS"; payload: Record<string, number> }
   | { type: "LOADING" }
   | { type: "SET_IDENTIFIER"; payload: string }
   | { type: "SET_FILTERS"; payload: string }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "EDIT"; payload: EditPayload };
 
 export const useResultReducer = (initialState: ReducerState) => {
   const [state, dispatch] = useReducer(
@@ -60,6 +66,14 @@ export const useResultReducer = (initialState: ReducerState) => {
             identifier: "",
           };
         }
+        case "EDIT": {
+          return {
+            ...state,
+            data: <Record<string, number>>(
+              editObjectKey({ ...action.payload, state: state.data! })
+            ),
+          };
+        }
         default: {
           return state;
         }
@@ -67,6 +81,18 @@ export const useResultReducer = (initialState: ReducerState) => {
     },
     initialState
   );
-
   return { state, dispatch };
 };
+
+interface EditObjectKeyParams {
+  state: Object;
+  key: string;
+  newKey: string;
+}
+
+type editObjectKeyFunction = (params: EditObjectKeyParams) => Object;
+
+const editObjectKey: editObjectKeyFunction = ({ state, key, newKey }) =>
+  Object.fromEntries(
+    Object.entries(state).map(([k, v]) => (k === key ? [newKey, v] : [k, v]))
+  );

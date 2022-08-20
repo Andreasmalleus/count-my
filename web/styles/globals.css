@@ -39,6 +39,9 @@ a {
   .btn-primary {
     @apply text-white text-xs border-none rounded p-2 shadow-md cursor-pointer text-center bg-gray-900 transition duration-200 hover:opacity-90;
   }
+  .btn-secondary {
+    @apply text-xs border-none rounded p-1 px-2 shadow-sm cursor-pointer text-center bg-slate-100 transition duration-200 hover:opacity-90;
+  }
 }
 
 
