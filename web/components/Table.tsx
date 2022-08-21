@@ -23,7 +23,7 @@ export const Table = ({ data, filter, editKey }: TableProps): JSX.Element => {
         <tr className="text-xs font-medium">
           <th className="text-left py-2 px-1 w-10">#</th>
           <th className="text-left p-2">Word</th>
-          <th className="text-left p-2 w-24">Count</th>
+          <th className="text-center p-2 w-40">Count</th>
         </tr>
       </thead>
       <tbody className="max-h-40 overflow-y-auto block" id="scrollbar">
@@ -55,7 +55,7 @@ export const Table = ({ data, filter, editKey }: TableProps): JSX.Element => {
                   </th>
                 )}
 
-                <th className="text-left py-3 px-2 relative w-20">
+                <th className="text-center py-3 px-2 relative w-40">
                   {data[key]}
                   {/* Show buttons depending on the state of editIndex */}
                   {editIndex === index ? (

@@ -25,12 +25,13 @@ public class QueueSender {
   }
 
   public Message sendAndReceive(byte[] order, boolean finished) {
+    System.out.println("current coutn " + sendCount);
     final Map<String, Object> headers = new HashMap<>();
     headers.put("finished", finished);
     Message message = MessageBuilder.withBody(order).copyHeaders(headers).setCorrelationIdIfAbsent(sendCount.toString())
         .build();
+    this.sendCount++;
     Message result = rabbitTemplate.sendAndReceive(RabbitConfig.EXCHANGE, RabbitConfig.MAIN_QUEUE, message);
-    sendCount++;
     return result;
   }
 }
