@@ -1,5 +1,10 @@
+FROM gradle:jdk17 as gradleImage
+WORKDIR /gradle/src/
+COPY . .
+RUN gradle clean build
+
 FROM openjdk:17-jdk-slim-buster
-ENV WORKDIR = /usr/app/
+WORKDIR /usr/app/
 
 ENV SERVER_PORT=8080
 ENV POSTGRES_PORT=5432
@@ -11,6 +16,5 @@ ENV POSTGRES_PASSWORD=test
 ENV RABBIT_USERNAME=guest
 ENV RABBIT_PASSWORD=guest
 
-WORKDIR $WORKDIR
-COPY build/libs/*.jar core-service.jar
+COPY --from=gradleImage /gradle/src/build/libs/*.jar core-service.jar
 ENTRYPOINT ["java","-jar","core-service.jar"]
