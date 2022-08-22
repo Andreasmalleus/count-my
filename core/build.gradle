@@ -26,14 +26,6 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 }
 
-
-flyway {
-    url = 'jdbc:postgresql://localhost:5432/word_count'
-    user = 'test'
-    password = 'test'
-    schemas = ['public']
-}
-
 tasks.named('test') {
 	useJUnitPlatform()
 }
