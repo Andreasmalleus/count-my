@@ -1,9 +1,9 @@
-FROM gradle:jdk17 as gradleImage
+FROM gradle:7.6-jdk17 AS gradleImage
 WORKDIR /gradle/src/
 COPY . .
 RUN gradle clean build
 
-FROM openjdk:17-jdk-slim-buster
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /usr/app/
 
 ENV SERVER_PORT=8080

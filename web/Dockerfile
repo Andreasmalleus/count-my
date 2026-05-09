@@ -1,7 +1,6 @@
-FROM node:alpine
+FROM node:18-alpine
 
-ENV WORKDIR = /usr/app/
-WORKDIR $WORKDIR
+WORKDIR /usr/app/
 
 COPY package*.json .
 RUN npm install --legacy-peer-deps
